@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const topicSchema = mongoose.Schema({
   name: String,
-  number: Number,
+  topicNumber: Number,
 });
 
 const Topic = mongoose.model('topics', topicSchema);
