@@ -52,30 +52,30 @@ const importRGAA = async () => {
 
         // 3.2 Crée un nouveau criteria à partir du modèle Criteria
         for (const criteriaData of topicData.criteria) {
-          console.log("demodemo", criteriaData.criterium.tests);
-          // const wcagRefArray = criteriaData.criterium.references[0].wcag;
+          const wcagRefArray = criteriaData.criterium.references[0].wcag;
 
-          // let wcagRef = "";
-          // if (wcagRefArray.includes("AAA")) {
-          //   wcagRef = "AAA";
-          // } else if (wcagRefArray.includes("AA")) {
-          //   wcagRef = "AA";
-          // } else {
-          //   wcagRef = "A";
-          // }
+          const testsArray = Object.entries(criteriaData.criterium.tests).map(test => {
+            const newTest = {};
+            newTest.testNumber = Number(test[0]);
+            newTest.conditions = test[1];
+            return newTest;
+          });
 
-          // const criteria = new Criteria({
-          //   criteriaNumber: criteriaData.criterium.number,
-          //   title: criteriaData.criterium.title,
-          //   criticality: wcagRef,
-          //   topic: topic._id,
-          //   tests: criteriaData.criterium.tests,
-          // });
+          console.log('testsArray', testsArray);
 
-          // await criteria.save();
-          // console.log(
-          //   `Critère ${criteriaData.criterium.number} enregistré (${criteriaData.criterium.criticality})`,
-          // );
+          const criteria = new Criteria({
+            criteriaNumber: criteriaData.criterium.number,
+            title: criteriaData.criterium.title,
+            criticality: 'A',
+            reference: wcagRefArray,
+            topic: topic._id,
+            tests: testsArray,
+          });
+
+          await criteria.save();
+          console.log(
+            `Critère ${criteriaData.criterium.number} enregistré (${criteriaData.criticality})`,
+          );
         }
       }
     }
@@ -88,13 +88,6 @@ const importRGAA = async () => {
     await mongoose.disconnect();
   }
 };
-
-// Extraction du niveau A / AA / AAA depuis les refs WCAG
-// const extractLevel = (wcagRef) => {
-//   if (wcagRef.includes("AAA")) return "AAA";
-//   if (wcagRef.includes("AA")) return "AA";
-//   return "A";
-// };
 
 importRGAA().then(() => {
   console.log("Import des données RGAA terminé");
