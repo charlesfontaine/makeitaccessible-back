@@ -5,7 +5,7 @@ const siteSchema = mongoose.Schema({
   domain: String,
   urls: [String],
   createdAt: Date,
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'users', default: null },
 });
 
 const Site = mongoose.model('sites', siteSchema);
