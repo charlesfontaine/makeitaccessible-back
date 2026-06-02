@@ -5,13 +5,13 @@ const fetch = require("node-fetch");
 const connectionString = process.env.CONNECTION_STRING;
 
 /**
- * Script pour vider les collections Sites, Audits et Issues
+ * Script pour vider les collections Sites, Audits et Tests
  */
 
 // Appel des modèles topics et criterias
 const Sites = require("../models/sites.js");
 const Audits = require("../models/audits.js");
-const Issues = require("../models/issues.js");
+const Tests = require("../models/tests.js");
 
 //
 const cleanBdd = async () => {
@@ -28,7 +28,7 @@ const cleanBdd = async () => {
     // 1. Nettoyage des collections existantes
     await Sites.deleteMany();
     await Audits.deleteMany();
-    await Issues.deleteMany();
+    await Tests.deleteMany();
 
     console.log("Collections dropped!");
   } catch (error) {

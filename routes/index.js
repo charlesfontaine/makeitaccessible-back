@@ -3,7 +3,7 @@ var router = express.Router();
 const runAllTests = require("../tests/runAllTests.js");
 const Site = require("../models/sites.js");
 const Audit = require("../models/audits.js");
-const Issue = require("../models/issues.js");
+const Test = require("../models/tests.js");
 let auditResults;
 
 const createAudit = async (url, siteId) => {
@@ -31,9 +31,9 @@ const createAudit = async (url, siteId) => {
   return newAudit;
 };
 
-const createIssues = async (category, resultsByFilteredCategory, auditId) => {
+const createTests = async (category, resultsByFilteredCategory, auditId) => {
   // Le modèle devrait s'appeller "Test"
-  const issue = new Issue({
+  const test = new Test({
     category,
     inapplicable: resultsByFilteredCategory.inapplicable,
     passes: resultsByFilteredCategory.passes,
@@ -42,12 +42,12 @@ const createIssues = async (category, resultsByFilteredCategory, auditId) => {
     audit: auditId,
   });
 
-  // On enregistre la nouvelle issue
-  // save est asynchrone: on doit attente le retour de la promesse qui valide l'enregistrement d'une issue
-  const newIssue = await issue.save();
-  // console.log(`Issue ${newIssue} has been saved!`);
+  // On enregistre le nouveau test
+  // save est asynchrone: on doit attente le retour de la promesse qui valide l'enregistrement d'un test
+  const newTest = await test.save();
+  // console.log(`Test ${newTest} has been saved!`);
 
-  return newIssue;
+  return newTest;
 };
 
 // Route POST qui lance un audit et récupère la key url dans le corps de la requête
@@ -89,26 +89,26 @@ router.post("/audit", async (req, res) => {
 
           // Si un nouvel a été enregisté en bdd
           if (newAudit) {
-            // On enregistre chaque issue (devrait s'appeller test) dans un tableau de promesses
+            // On enregistre chaque test (devrait s'appeller test) dans un tableau de promesses
             // => Pour l'instant on remonte tous les résultats (pas que les violations/anomalies)
             const promises = auditResults.map(async (result) => {
-              return await createIssues(
+              return await createTests(
                 result.category,
                 result.resultsByFilteredCategory,
                 newAudit._id,
               );
             });
 
-            // On attend que toutes les promesses soient résolues => on attends que toutes les issues soient enregistrées en bdd
+            // On attend que toutes les promesses soient résolues => on attends que toutes les tests soient enregistrées en bdd
             // Promise.all renvoie lui même une promesse...
-            Promise.all(promises).then((newIssues) => {
-              // console.log("newIssues", newIssues);
-              // console.log(`All ${newIssues} have been saved!`);
+            Promise.all(promises).then((newTests) => {
+              // console.log("newTests", newTests);
+              // console.log(`All ${newTests} have been saved!`);
               res.status(200).json({
                 result: true,
                 website: newSite,
                 audit: newAudit,
-                issues: newIssues,
+                tests: newTests,
               });
             });
           }
@@ -123,24 +123,24 @@ router.post("/audit", async (req, res) => {
             if (newAudit) {
               // On enregistre le nouvel audit
               newAudit.save().then((newAudit) => {
-                // On enregistre chaque issue (devrait s'appeller test) dans un tableau de promesses
+                // On enregistre chaque test (devrait s'appeller test) dans un tableau de promesses
                 // => Pour l'instant on remonte tous les résultats (pas que les violations/anomalies)
                 const promises = auditResults.map(async (result) => {
-                  return await createIssues(
+                  return await createTests(
                     result.category,
                     result.resultsByFilteredCategory,
                     newAudit._id,
                   );
                 });
 
-                // On attend que toutes les promesses soient résolues => on attends que toutes les issues soient enregistrées en bdd
+                // On attend que toutes les promesses soient résolues => on attends que toutes les tests soient enregistrées en bdd
                 // Promise.all renvoie lui même une promesse...
-                Promise.all(promises).then((newIssues) => {
+                Promise.all(promises).then((newTests) => {
                   res.status(200).json({
                     result: true,
                     website: updatedSite,
                     audit: newAudit,
-                    issues: newIssues,
+                    tests: newTests,
                   });
                 });
               });
