@@ -123,10 +123,15 @@ const handleAuditCreation = async (siteId, axeCoreResults, url) => {
 // Route POST qui lance un audit et récupère la key url dans le corps de la requête
 router.post("/audit", async (req, res) => {
   const { url, name, domain } = req.body;
+  
+  // Regex pour vérifier si conforme : doit commencer par https:// + obligation d'avoir un point avec des caractères de chaque côté.
+  const urlCheck = /^https:\/\/.+\..+/;
 
-  // @nina todo : vérifier/tester qu'une url envoyée est bien au format url (http://, https://) via une regex
-  if (url === undefined || url === "") {
-    res.status(403).json({ result: false, error: "Missing or empty url" });
+  // !url = true si url est undefined, null
+  // !urlCheck.test(url) = true si l'url ne correspond pas au format
+  // .test() = méthode native RegExp, prend une string et retourne true/false selon si la regex matche ou pas
+  if (!url || !urlCheck.test(url)) {
+    res.status(403).json({ result: false, error: "url incorrect" });
     return;
   }
 
@@ -135,6 +140,8 @@ router.post("/audit", async (req, res) => {
     axeCoreResults = await runAllTests(url);
   } catch (error) {
     console.error(error);
+    res.status(503).json({ result: false, error: "L'audit a échoué, veuillez réessayer." });
+    return;
   }
 
   // Si on a des résultats (anomalies, etc...)
@@ -178,7 +185,7 @@ router.post("/audit", async (req, res) => {
       }
     });
   } else {
-    res.status(403).json({ result: false, error: "Axe-core has failed" });
+    res.status(403).json({ result: false, error: "aucun résultat" });
   }
 });
 
