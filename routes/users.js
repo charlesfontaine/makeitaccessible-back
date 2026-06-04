@@ -73,25 +73,37 @@ User.findOne({ token: token })
 
 // router.put('/user', (req, res) => {
 
-//   const token = req.query.token
-//   const updates = req.body.
+  User.findOne({ token: req.body.token })
+  .then(data => {
+    if (!data) {
+      res.json({ result: false, error: 'User not found' });
+      return;
+    }
+    User.find
 
-//   if (!token) {
-//     res.json({ result: false, error: 'missing token' });
-//     return;
+  const token = req.body.token
+  const updates = req.body.username
 
-//   User.findOneAndUpdate(
-//     { token: token },
-//     { firstName: firstName },
-//     { lastName: lastName },
-//     { username: username },
-//     { email: email },
-//     { password: password },
+  if (!token) {
+    res.json({ result: false, error: 'missing token' });
+    return;
 
+  
+  User.findOneAndUpdate(
+    { token: token },
+    updates,
     
+  {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password
+  }
 
-//     { new: true }
-//   )
+    // { new: true }
+  )
 
-// })
+}})
+
 module.exports = router;
