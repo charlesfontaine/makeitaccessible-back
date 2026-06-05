@@ -64,46 +64,52 @@ router.get('/user', (req, res) => {
 
 User.findOne({ token: token })
  .then(data => {
-  res.json(data)
+  data.password = undefined;
+  res.json(data);
  })
  .catch(error => {
       res.json({ result: false, error: error.message });
     });
-})
+});
 
-// router.put('/user', (req, res) => {
-
-  User.findOne({ token: req.body.token })
-  .then(data => {
-    if (!data) {
-      res.json({ result: false, error: 'User not found' });
-      return;
-    }
-    User.find
+router.put('/user', (req, res) => {
 
   const token = req.body.token
-  const updates = req.body.username
-
-  if (!token) {
+    if (!token) {
     res.json({ result: false, error: 'missing token' });
     return;
+  }
 
+  const updates = {};
+  if (req.body.firstName) updates.firstName = req.body.firstName.trim();
+  if (req.body.lastName) updates.lastName = req.body.lastName.trim();
+  if (req.body.username) updates.username = req.body.username.trim();
+  if (req.body.email) updates.email = req.body.email.trim();
+  if (req.body.password) updates.password = bcrypt.hashSync(req.body.password, 10);
   
+  if(Object.keys(updates).length === 0) {
+    res.json({ result: false, error: 'no fields to update' });
+    return;
+  }
+
   User.findOneAndUpdate(
     { token: token },
     updates,
-    
-  {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password
+ {new: true}
+  )  
+  .then(data => {
+
+     if (!data) {
+    return res.json({ result: false, error: "User not found" });
   }
+    data.password = undefined;
 
-    // { new: true }
-  )
+    res.json({ result: true, user: data });
+  })
+  .catch(error => {
+    res.json({ result: false, error: error.message });
+  });
 
-}})
+});
 
 module.exports = router;
