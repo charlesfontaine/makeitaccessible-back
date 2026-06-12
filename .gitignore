@@ -60,6 +60,9 @@ typings/
 # next.js build output
 .next
 
+# Apple
+.DS_Store
+
 # Playwright
 /test-results/
 /playwright-report/
