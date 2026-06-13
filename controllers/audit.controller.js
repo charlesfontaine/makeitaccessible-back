@@ -186,20 +186,22 @@ const auditController = async (req, res) => {
 
     // Si un Audit a bien été créé en bdd
     if (newAudit) {
+      console.log('newAudit', newAudit);
+      
       // Vérifie si l'utilisateur est connecté via son token
       if (!user) {
         // Non connecté : score global uniquement : results
         return res.status(200).json({
           result: true,
           website: newSite,
-          audit: newAudit.results
+          audit: { results: newAudit.results }
         });
       } else {
         // Connecté : toutes les données disponibles à l'utilisateur : results + tests
         return res.status(200).json({
           result: true,
           website: newSite,
-          audit: newAudit
+          audit: { results: newAudit.results, tests: newAudit.tests }
         });
       }
     } else {
