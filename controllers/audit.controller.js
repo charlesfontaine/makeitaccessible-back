@@ -109,7 +109,7 @@ const handleCreateAudit = async (siteId, userId, url, axeCoreResults) => {
 }
 
 // Fonction de création d'un audit appelé par la route POST /audit
-const createAuditController = async (req, res) => {
+const createAuditAction = async (req, res) => {
   const { url, name, domain, token } = req.body;
   
   // Regex pour vérifier si conforme : doit commencer par https:// + obligation d'avoir un point avec des caractères de chaque côté.
@@ -198,7 +198,7 @@ const createAuditController = async (req, res) => {
 }
 
 // Fonction qui récupère un audit via son id (indentication d'une ressource via le params envoyé dans l'url)
-const getAuditController = (req, res) => {
+const getAuditAction = (req, res) => {
   Audit.findById(req.params.id).then((auditDoc) => {
     if (auditDoc !== null) {
       Test.find({ audit: auditDoc._id }).then(testsDoc => {
@@ -213,37 +213,4 @@ const getAuditController = (req, res) => {
   });
 }
 
-// Fonction qui valide un test
-const testValidationController = (req, res) => {
-  if (!checkBody(req.body, ['token', 'testId'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
-  }
-
-  User.findOne({ token: req.body.token }).then(user => {
-    if (user === null) {
-      res.json({ result: false, error: 'User not found' });
-      return;
-    }
-
-    Test.findById(req.body.testId).then(test => {
-      if (!test) {
-        res.json({ result: false, error: 'Test not found' });
-        return;
-      }
-
-      Test.updateOne(
-        { _id: newAudit._id },
-        {
-          $set: {
-            status: "validated"
-          }
-        }
-      ).then(() => {
-        res.status(200).json({ result: true });
-      });
-    });
-  });
-}
-
-module.exports = {createAuditController, getAuditController};
+module.exports = {createAuditAction, getAuditAction};

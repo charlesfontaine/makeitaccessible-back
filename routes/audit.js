@@ -1,13 +1,12 @@
 var express = require("express");
 var router = express.Router();
 
-const {createAuditController, getAuditController, testValidationController} = require('../controllers/audit.controller.js');
+const {createAuditAction, getAuditAction, testValidationAction} = require('../controllers/audit.controller.js');
 
 // Route POST qui lance un audit et récupère la proprieté "url" dans le corps (body) de la requête
-router.post("/", createAuditController);
+router.post("/", createAuditAction);
 
-router.post("/tests/validate", testValidationController);
-
-router.get("/:id", getAuditController);
+// Route GET qui récupère un audit par son id passé en params
+router.get("/:id", getAuditAction);
 
 module.exports = router;
