@@ -6,4 +6,7 @@ const { getSiteAuditSummaryController } = require('../controllers/site.controlle
 // POST / enregistre un résumé pour un site (tous les audits (url) d'un même site (domain))
 router.post("/:siteId/audit-summary", getSiteAuditSummaryController); 
 
+// DELETE / supprimer un site
+// /:id  @todo Nina
+
 module.exports = router;
