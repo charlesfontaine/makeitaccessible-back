@@ -229,4 +229,37 @@ const getAuditController = (req, res) => {
   });
 }
 
+// Fonction qui valide un test
+const testValidationController = (req, res) => {
+  if (!checkBody(req.body, ['token', 'testId'])) {
+    res.json({ result: false, error: 'Missing or empty fields' });
+    return;
+  }
+
+  User.findOne({ token: req.body.token }).then(user => {
+    if (user === null) {
+      res.json({ result: false, error: 'User not found' });
+      return;
+    }
+
+    Test.findById(req.body.testId).then(test => {
+      if (!test) {
+        res.json({ result: false, error: 'Test not found' });
+        return;
+      }
+
+      Test.updateOne(
+        { _id: newAudit._id },
+        {
+          $set: {
+            status: "validated"
+          }
+        }
+      ).then(() => {
+        res.status(200).json({ result: true });
+      });
+    });
+  });
+}
+
 module.exports = {createAuditController, getAuditController};
