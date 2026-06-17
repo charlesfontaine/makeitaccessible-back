@@ -179,14 +179,15 @@ const createAuditAction = async (req, res) => {
         return res.status(200).json({
           result: true,
           website: newSite,
-          audit: { results: newAudit.results }
+          results: newAudit.results,
         });
       } else {
         // Connecté : toutes les données disponibles à l'utilisateur : results + tests
         return res.status(200).json({
           result: true,
           website: newSite,
-          audit: { results: newAudit.results, tests: newAudit.tests }
+          results: newAudit.results,
+          tests: newAudit.tests,
         });
       }
     } else {
@@ -204,7 +205,8 @@ const getAuditAction = (req, res) => {
       Test.find({ audit: auditDoc._id }).then(testsDoc => {
         res.status(200).json({
           result: true,
-          audit: { results: auditDoc, tests: testsDoc }
+          results: auditDoc,
+          tests: testsDoc
         });
       });
     } else {
