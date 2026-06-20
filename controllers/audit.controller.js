@@ -4,8 +4,9 @@ const Site = require("../models/sites.js");
 const Audit = require("../models/audits.js");
 const Test = require("../models/tests.js");
 const { checkBody } = require("../modules/checkBody.js");
-const { calculateAuditSummary } = require('../services/score.service.js');
+const { calculateAuditSummary } = require('../services/scoreAudit.service.js');
 
+// CREATE
 // Fonction de création d'un audit
 const createAudit = async (siteId, userId, url) => {
   const audit = new Audit({
@@ -198,6 +199,7 @@ const createAuditAction = async (req, res) => {
   }
 }
 
+// READ
 // Fonction qui récupère un audit via son id (indentication d'une ressource via le params envoyé dans l'url)
 const getAuditAction = (req, res) => {
   Audit.findById(req.params.id).then((auditDoc) => {
@@ -236,7 +238,32 @@ const getAllAuditsAction = async (req, res) => {
   res.status(200).json({ result: true, audits });
 };
 
-// DELETE: supprimer un audit
+// GET / dynamique par audit 
+const getAuditView = async (req, res) => {
+  const { token, id } = req.params;
+
+   const user = await User.findOne({ token });
+  if (!user) {
+    return res.status(403).json({ result: false, error: "Utilisateur non trouvé" });
+  }
+
+  const audit = await Audit.findById(id)
+    .populate('site', 'name domain')
+
+         if (!audit) {
+
+    return res.status(404).json({ result: false, error: "Audit introuvable" });
+  }
+
+  const tests = await Test.find({audit: audit._id});
+
+   res.json({ result: true, results: audit, tests: tests });
+
+};
+
+
+// DELETE
+// supprimer un audit
 const deleteAuditAction = async (req, res) => {
   const { auditId } = req.params;
   const { token } = req.body;
@@ -271,4 +298,4 @@ const deleteAuditAction = async (req, res) => {
   res.status(200).json({ result: true });
 };
 
-module.exports = { createAuditAction, getAuditAction, getAllAuditsAction, deleteAuditAction };
+module.exports = { createAuditAction, getAuditAction, getAllAuditsAction, getAuditView, deleteAuditAction };
