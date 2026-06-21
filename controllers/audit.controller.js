@@ -275,7 +275,7 @@ const searchAudit = async (req, res) => {
 		const filters = {};
 		if (search) filters.url = { $regex: new RegExp(search, 'i') };
 
-		const audits = await Audit.find(filters);
+		const audits = await Audit.find(filters).populate('site');
 
 		if (audits.length === 0) {
 			return res.json({ result: false, error: 'Aucun audit trouvé' });
