@@ -105,7 +105,7 @@ router.post("/signin", (req, res) => {
         });
       }
     } else {
-      res.status(403).json({ result: false, error: "User not found or wrong password" });
+      res.status(403).json({ result: false, error: "Utilisateur non trouvé or wrong password" });
     }
   });
 });
@@ -150,7 +150,7 @@ router.put("/user", (req, res) => {
   User.findOneAndUpdate({ token: token }, updates, { new: true })
     .then((data) => {
       if (!data) {
-        return res.json({ result: false, error: "User not found" });
+        return res.json({ result: false, error: "Utilisateur non trouvé" });
       }
       data.password = undefined;
 
@@ -161,8 +161,7 @@ router.put("/user", (req, res) => {
     });
 });
 
-// DELETE
-
+// Delete route to delete a user
 router.delete("/",  async(req, res)  => {
   if (!checkBody(req.body, ['token'])) {
     return res.json({ result: false, error: 'Les champs obligatoires sont manquants ou invalides' });
@@ -170,7 +169,7 @@ router.delete("/",  async(req, res)  => {
 
   const user = await User.findOne({ token: req.body.token });
   if (!user) {
-    return res.json({ result: false, error: 'User not found' });
+    return res.json({ result: false, error: 'Utilisateur non trouvé' });
   }
 
   // 1. Tous les audits de l'utilisateur

@@ -12,7 +12,7 @@ const testValidationAction = (req, res) => {
   // Vérifie sur l'utilisateur est trouvé. Si l'utilisateur existe, il a l'autorisation de valider un test
   User.findOne({ token: req.body.token }).then(async user => {
     if (user === null) {
-      res.json({ result: false, error: 'User not found' });
+      res.json({ result: false, error: 'Utilisateur non trouvé' });
       return;
     }
 
@@ -44,7 +44,7 @@ const testIgnoreAction = (req, res) => {
   // Vérifie sur l'utilisateur est trouvé. Si l'utilisateur existe, il a l'autorisation de valider un test
   User.findOne({ token: req.body.token }).then(async user => {
     if (user === null) {
-      res.json({ result: false, error: 'User not found' });
+      res.json({ result: false, error: 'Utilisateur non trouvé' });
       return;
     }
 
@@ -78,7 +78,7 @@ const testReviewAction = (req, res) => {
   // Vérifie sur l'utilisateur est trouvé. Si l'utilisateur existe, il a l'autorisation de valider un test
   User.findOne({ token: req.body.token }).then(async user => {
     if (user === null) {
-      res.json({ result: false, error: 'User not found' });
+      res.json({ result: false, error: 'Utilisateur non trouvé' });
       return;
     }
 
