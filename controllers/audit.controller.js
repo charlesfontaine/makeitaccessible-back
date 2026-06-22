@@ -337,10 +337,8 @@ const deleteAuditAction = async (req, res) => {
 };
 
 // GET: générer les résultats d'un audit au format PDF
+/* 
 const generatePDFAuditAction = async (req, res) => {
-  //onst script = readFileSync(`./build/static/js/main.<hash>.js`) // reference to compiled react app
-  //const css = readFileSync(`./build/static/css/main.<hash>.css`) // reference to compiled react css
-
   // inline script and styles into a html boilerplate
   const staticHtml = `
   <!DOCTYPE html>
@@ -370,5 +368,6 @@ const generatePDFAuditAction = async (req, res) => {
 
   await browser.close()
 }
+*/
 
-module.exports = { createAuditAction, getAuditAction, getAllAuditsAction, getAuditViewAction, searchAuditAction, deleteAuditAction, generatePDFAuditAction };
+module.exports = { createAuditAction, getAuditAction, getAllAuditsAction, getAuditViewAction, searchAuditAction, deleteAuditAction };

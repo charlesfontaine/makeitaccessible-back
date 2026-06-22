@@ -29,7 +29,7 @@ router.get('/search/:token', searchAuditAction);
 router.delete("/:id", deleteAuditAction);
 
 // Route GET : genérer les résultats d'un audit au format PDF
-router.get("/:token/:id/generate-pdf", generatePDFAuditAction);
+// router.get("/:token/:id/generate-pdf", generatePDFAuditAction);
 
 
 module.exports = router;
