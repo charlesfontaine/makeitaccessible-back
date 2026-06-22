@@ -7,8 +7,7 @@ const {
   getAllAuditsAction,
   getAuditViewAction,
   deleteAuditAction,
-  searchAuditAction,
-  generatePDFAuditAction } = require('../controllers/audit.controller.js');
+  searchAuditAction } = require('../controllers/audit.controller.js');
 
 // Route POST qui lance un audit et récupère la proprieté "url" dans le corps (body) de la requête
 router.post("/", createAuditAction);
