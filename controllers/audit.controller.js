@@ -1,7 +1,7 @@
 // Nécessaire pour la mise en production sur Vercel car les fonctions serverless de Vercel ne supportent pas Playwright nativement
 // On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
 const playwright = require('playwright-core');
-const chromium = require('@sparticuz/chromium');
+// const chromium = require('@sparticuz/chromium');
 //var chromium = require("playwright");
 
 const runAllTests = require("../tests/runAllTests.js");
@@ -385,6 +385,7 @@ const generatePDFAuditAction = async (req, res, next) => {
           </html>`;
 
         // Lance chromium via la lib @sparticuz/chromium pour lancer un navigateur headless sur un environnement serverless
+        const { default: chromium } = await import('@sparticuz/chromium');
         const browser = await playwright.chromium.launch({
           args: chromium.args,
           executablePath: await chromium.executablePath(),
