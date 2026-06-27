@@ -1,5 +1,8 @@
-var { chromium } = require("playwright");
-//var { readFileSync, readdirSync } = require("fs");
+// Nécessaire pour la mise en production sur Vercel car les fonctions serverless de Vercel ne supportent pas Playwright nativement
+// On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
+const playwright = require('playwright-core');
+const chromium = require('@sparticuz/chromium');
+//var { chromium } = require("playwright");
 
 const runAllTests = require("../tests/runAllTests.js");
 const User = require('../models/users');
