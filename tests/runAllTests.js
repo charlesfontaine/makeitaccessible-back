@@ -63,7 +63,7 @@ async function runAllTests(url) {
   await page.goto(url);
 
   // 2. Injection du script axe-core + audit
-  await page.addScriptTag({ path: path.join(__dirname, '../../node_modules/axe-core/axe.min.js') });
+  await page.addScriptTag({ path: path.join(__dirname, '../node_modules/axe-core/axe.min.js') });
 
   // 3. On configure axe-core pour avoir des résultats en français
   const audit = await page.evaluate(async (locale) => {
