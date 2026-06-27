@@ -2,7 +2,7 @@
 // On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
 // const playwright = require('playwright-core');
 // const chromium = require('@sparticuz/chromium');
-// var chromium = require("playwright");
+const playwright = require('playwright');
 
 const path = require('path');
 var frLocale = require("axe-core/locales/fr.json"); // locale FR officielle
@@ -52,20 +52,22 @@ async function runAllTests(url) {
   // construit un vrai DOM complet en mémoire.
   // note: si vous ne pouvez pas installer Playwright via yarn, faîtes "npx playwright install"
   
+  // Lance chromium via la lib @sparticuz/chromium pour lancer un navigateur headless sur un environnement serverless
+  let browser;
   if (process.env.VERCEL) {
   // Lance chromium via la lib @sparticuz/chromium pour lancer un navigateur headless sur un environnement serverless
   // Vercel : binaire Linux via @sparticuz/chromium  
     const { default: chromium } = await import('@sparticuz/chromium');
-    const browser = await playwright.chromium.launch({
+    browser = await playwright.chromium.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
     });
   } else {
     // Local : playwright complet avec navigateurs installés
-    const { chromium: localChromium } = require('playwright');
+    // On doit installer le navigateur chromium en local: npx playwright install chromium
     // Lance chromium
-    const browser = await chromium.launch({ headless: true });
+    browser = await playwright.chromium.launch({ headless: true });
   }
   // Crée une page viruel
   const page = await browser.newPage();

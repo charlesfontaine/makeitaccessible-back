@@ -1,8 +1,8 @@
 // Nécessaire pour la mise en production sur Vercel car les fonctions serverless de Vercel ne supportent pas Playwright nativement
 // On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
-const playwright = require('playwright-core');
+// const playwright = require('playwright-core');
 // const chromium = require('@sparticuz/chromium');
-//var chromium = require("playwright");
+const playwright = require('playwright');
 
 const runAllTests = require("../tests/runAllTests.js");
 const User = require('../models/users');
@@ -385,17 +385,21 @@ const generatePDFAuditAction = async (req, res, next) => {
           </html>`;
 
         // Lance chromium via la lib @sparticuz/chromium pour lancer un navigateur headless sur un environnement serverless
+        let browser;
         if (process.env.VERCEL) {
+        // Lance chromium via la lib @sparticuz/chromium pour lancer un navigateur headless sur un environnement serverless
+        // Vercel : binaire Linux via @sparticuz/chromium  
           const { default: chromium } = await import('@sparticuz/chromium');
-          const browser = await playwright.chromium.launch({
+          browser = await playwright.chromium.launch({
             args: chromium.args,
             executablePath: await chromium.executablePath(),
             headless: chromium.headless,
           });
         } else {
           // Local : playwright complet avec navigateurs installés
-          const { chromium: localChromium } = require('playwright');
-          const browser = await chromium.launch();
+          // On doit installer le navigateur chromium en local: npx playwright install chromium
+          // Lance chromium
+          browser = await playwright.chromium.launch({ headless: true });
         }
         // Lance chromium et crée une page virtuelle
         const context = await browser.newContext();
