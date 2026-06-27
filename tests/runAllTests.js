@@ -3,6 +3,7 @@
 const playwright = require('playwright-core');
 const chromium = require('@sparticuz/chromium');
 // var chromium = require("playwright");
+const path = require('path');
 var frLocale = require("axe-core/locales/fr.json"); // locale FR officielle
 var scanImages = require("./categories/images.test.js"); // 1. Images
 var scanCadres = require("./categories/cadres.test.js"); // 2. Cadres
@@ -61,7 +62,7 @@ async function runAllTests(url) {
   await page.goto(url);
 
   // 2. Injection du script axe-core + audit
-  await page.addScriptTag({ path: "./node_modules/axe-core/axe.min.js" });
+  await page.addScriptTag({ path: path.join(__dirname, '../../node_modules/axe-core/axe.min.js') });
 
   // 3. On configure axe-core pour avoir des résultats en français
   const audit = await page.evaluate(async (locale) => {
