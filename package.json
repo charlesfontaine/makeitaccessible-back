@@ -1,9 +1,11 @@
 {
   "name": "makeitaccessible-back",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./bin/www",
+    "dev": "concurrently -k -n \"TS,Node\" -p \"[{name}]\" -c \"blue,green\" \"tsc --watch\" \"nodemon\"",
     "dump:collections": "node ./scripts/dump_collections.js",
     "jest": "jest ./app.test.js",
     "postinstall": "playwright install chromium"
@@ -30,7 +32,10 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.1",
+    "concurrently": "^10.0.5",
     "jest": "^30.4.2",
-    "supertest": "^7.2.2"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2",
+    "typescript": "^7.0.2"
   }
 }
