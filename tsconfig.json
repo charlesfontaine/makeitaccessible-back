@@ -1,0 +1,19 @@
+// Contient les informations pour compiler le projet
+{
+  // Défini les répertoires sources et de destination lors de la compilation
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "target": "es2015",
+    "noEmitOnError": false, // Ne génère pas de fichier de sortie si TS rencontre une erreur
+    //"noEmit": true, // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
+    "strict": true,
+  },
+  // Fichiers que TS va devoir charger en amont
+  /* "files": [
+    "src/app.ts"
+  ], */
+  "include": [
+    "src/**/*.ts"
+  ]
+}
