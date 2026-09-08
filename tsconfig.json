@@ -2,9 +2,14 @@
 {
   // Défini les répertoires sources et de destination lors de la compilation
   "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "target": "es2015",
+    "target": "es2025",
     "noEmitOnError": false, // Ne génère pas de fichier de sortie si TS rencontre une erreur
     //"noEmit": true, // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
     "strict": true,

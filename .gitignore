@@ -77,3 +77,6 @@ tests/example.spec.js
 
 #PDFs
 /pdfs/
+
+#Typescript
+/dist/

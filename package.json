@@ -2,10 +2,11 @@
   "name": "makeitaccessible-back",
   "version": "1.0.0",
   "private": true,
+  "main": "./dist/bin/www",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./bin/www",
-    "dev": "concurrently -k -n \"TS,Node\" -p \"[{name}]\" -c \"blue,green\" \"tsc --watch\" \"nodemon\"",
+    "start": "node ./dist/bin/www",
+    "dev": "concurrently -k -n \"TS,Node\" -p \"[{name}]\" -c \"blue,green\" \"tsc --watch\" \"nodemon ./dist/bin/www\"",
     "dump:collections": "node ./scripts/dump_collections.js",
     "jest": "jest ./app.test.js",
     "postinstall": "playwright install chromium"
