@@ -1,6 +1,22 @@
-const mongoose = require("mongoose");
+import mongoose, { Types } from 'mongoose';
 
-const auditSchema = mongoose.Schema({
+export interface IAudit {
+  url: string | undefined;
+  status: string;
+  createdAt: Date;
+  summary: {
+    inapplicable: number;
+    passes: number;
+    incomplete: number;
+    violations: number;
+    total: number;
+    score: number;
+  };
+  site: Types.ObjectId;
+  user: Types.ObjectId;
+}
+
+const auditSchema = new mongoose.Schema<IAudit>({
   url: { type: String, default: null }, // url du site à auditer
   status: { type: String, default: "pending" }, // status d'état de l'analyse renvoyé par axe-core
   createdAt: { type: Date, default: Date.now() }, // date de création de l'audit
@@ -16,6 +32,6 @@ const auditSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "users", default: null } // réf. vers la collections users
 });
 
-const Audit = mongoose.model("audits", auditSchema);
+const Audit = mongoose.model<IAudit>("audits", auditSchema);
 
-module.exports = Audit;
+export default Audit;
