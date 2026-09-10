@@ -9,9 +9,14 @@
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "target": "es2025",
-    "noEmitOnError": false, // Ne génère pas de fichier de sortie si TS rencontre une erreur
-    //"noEmit": true, // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
+    "target": "es2015",
+    "noUncheckedIndexedAccess": true, // Empêche d'accéder à une propriété sans avoir vérifié au préalable l'index (sauf cas d'utilisation d'un tuple)
+    "moduleResolution": "bundler",    // Indique d'utiliser le système de résolution de node.js afin d'aller récupérer dans node_modules le fichier de déclaration s'il est absent
+    "noEmitOnError": false,           // Ne génère pas de fichier de sortie si TS rencontre une erreur
+    //"noEmit": true,                 // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
+    // "declaration": true,           // Permet de générer automatiquement les fichiers de déclarations exportés dans ./dist
+    // "declarationDir":              // "./src/types", // Permet de spécifier un répertoire particulier pour l'export des fichiers de déclaration
+    // allowImportingTsExtensions,    // Autorise l'import de fichier .ts au lieu de .js lorsque "module":"nodenext"
     "strict": true,
   },
   // Fichiers que TS va devoir charger en amont
@@ -20,5 +25,5 @@
   ], */
   "include": [
     "src/**/*.ts"
-  ]
+, "src/routes/auth.js", "src/routes/site.js", "src/routes/test.js", "src/routes/users.js", "src/scripts/dump_collections.js", "src/scripts/rgaa.js", "src/se, "src/controllers/site.controller.js", "src/controllers/test.controller.js", "src/config/passport.js", "src/routes/audit.js"rvices/scoreAudit.service.js, "src/models/users.js", "src/controllers/audit.controller.js"", "src/service, "src/models/audits.js", "src/models/sites.js", "src/models/tests.js"s/scoreSite.service.js"  ]
 }
