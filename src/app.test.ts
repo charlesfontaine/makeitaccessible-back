@@ -1,7 +1,6 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from './app';
-import Audit from './models/audits';
 
 // Can post an audit as an anonymous user (launch createAuditAction function)
 it('POST /audit', async () => {
