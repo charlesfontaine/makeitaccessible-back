@@ -18,6 +18,7 @@
     // "declarationDir":              // "./src/types", // Permet de spécifier un répertoire particulier pour l'export des fichiers de déclaration
     // allowImportingTsExtensions,    // Autorise l'import de fichier .ts au lieu de .js lorsque "module":"nodenext"
     "strict": true,
+    "types": ["node", "jest"],
   },
   // Fichiers que TS va devoir charger en amont
   /* "files": [
@@ -25,5 +26,5 @@
   ], */
   "include": [
     "src/**/*.ts"
-, "src/routes/auth.js", "src/routes/site.js", "src/routes/test.js", "src/routes/users.js", "src/scripts/dump_collections.js", "src/scripts/rgaa.js", "src/se, "src/controllers/site.controller.js", "src/controllers/test.controller.js", "src/config/passport.js", "src/routes/audit.js"rvices/scoreAudit.service.js, "src/models/users.js", "src/controllers/audit.controller.js"", "src/service, "src/models/audits.js", "src/models/sites.js", "src/models/tests.js"s/scoreSite.service.js"  ]
+  ]
 }
