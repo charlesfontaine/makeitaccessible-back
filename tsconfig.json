@@ -10,15 +10,15 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "target": "es2015",
-    "noUncheckedIndexedAccess": true, // Empêche d'accéder à une propriété sans avoir vérifié au préalable l'index (sauf cas d'utilisation d'un tuple)
-    "moduleResolution": "bundler",    // Indique d'utiliser le système de résolution de node.js afin d'aller récupérer dans node_modules le fichier de déclaration s'il est absent
-    "noEmitOnError": false,           // Ne génère pas de fichier de sortie si TS rencontre une erreur
-    //"noEmit": true,                 // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
-    // "declaration": true,           // Permet de générer automatiquement les fichiers de déclarations exportés dans ./dist
-    // "declarationDir":              // "./src/types", // Permet de spécifier un répertoire particulier pour l'export des fichiers de déclaration
-    // allowImportingTsExtensions,    // Autorise l'import de fichier .ts au lieu de .js lorsque "module":"nodenext"
+    "noUncheckedIndexedAccess": true,     // Empêche d'accéder à une propriété sans avoir vérifié au préalable l'index (sauf cas d'utilisation d'un tuple)
+    "moduleResolution": "bundler",        // Autorise les imports relatifs sans extension et ndique au système de résolution d'aller récupérer dans node_modules les fichiers de déclaration s'ils sont absents
+    "noEmitOnError": false,               // Ne génère pas de fichier de sortie si TS rencontre une erreur
+    //"noEmit": true,                     // Ne génère jamais de fichiers de sortie, intéressant pour utiliser TS simplement pour vérifier du code
+    //"declaration": true,                // Permet de générer automatiquement les fichiers de déclarations exportés dans ./dist
+    //"declarationDir":                   // "./src/types", // Permet de spécifier un répertoire particulier pour l'export des fichiers de déclaration
+    //"allowImportingTsExtensions": true, // Autorise l'import de fichier .ts au lieu de .js lorsque "module":"nodenext"
     "strict": true,
-    "types": ["node", "jest"],
+    "types": ["node", "jest"],            // Whitelist car l'auto-inclusion de @types/jest v3 bug
   },
   // Fichiers que TS va devoir charger en amont
   /* "files": [
