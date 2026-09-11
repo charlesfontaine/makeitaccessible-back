@@ -1,6 +1,5 @@
-var express = require("express");
-var router = express.Router();
-
+import express, { Request, Response } from "express";
+const router = express.Router();
 const {testValidationAction, testIgnoreAction, testReviewAction} = require('../controllers/test.controller.js');
 
 // Route PUT qui valide une rule axe-core
@@ -12,4 +11,4 @@ router.put("/ignore", testIgnoreAction);
 // Route PUT qui commente une rule axe-core
 router.put("/review", testReviewAction);
 
-module.exports = router;
+export { router }

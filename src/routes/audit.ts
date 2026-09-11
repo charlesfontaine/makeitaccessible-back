@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router();
+import express, { Request, Response } from "express";
+const router = express.Router();
 
 const {
   createAuditAction,
@@ -31,4 +31,4 @@ router.delete("/:id", deleteAuditAction);
 // Route GET : genérer les résultats d'un audit au format PDF
 router.get("/generate-pdf/:token/:id", generatePDFAuditAction);
 
-module.exports = router;
+export { router }

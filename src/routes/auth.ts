@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
-const passport = require('passport');
+import express, { Request, Response } from "express";
+import passport from "passport";
+
+const router = express.Router();
 
 // Redirection vers Google
 router.get(
@@ -27,4 +28,4 @@ router.get(
   }
 );
 
-module.exports = router;
+export { router }

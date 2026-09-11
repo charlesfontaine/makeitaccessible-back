@@ -1,24 +1,21 @@
-require('dotenv').config();
-require('./models/connection');
+import express from 'express';
+import './models/connection';
+// import passport from './config/passport';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import cors from 'cors';
 
-var express = require('express');
-const passport = require('passport');
-require('./config/passport');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
-var usersRouter = require('./routes/users');
-var auditRouter = require('./routes/audit');
-var testRouter = require('./routes/test');
-var authRouter = require('./routes/auth');
-var siteRouter = require('./routes/site');
+import { router as usersRouter } from './routes/users';
+import { router as auditRouter } from './routes/audit';
+import { router as testRouter } from './routes/test';
+import { router as authRouter } from './routes/auth';
+import { router as siteRouter } from './routes/site';
 
 
-var app = express();
-app.use(passport.initialize());
+const app = express();
+// app.use(passport.initialize());
 
-const cors = require('cors');
 app.use(cors());
 
 app.use(logger('dev'));
@@ -33,4 +30,4 @@ app.use('/test', testRouter);
 app.use('/auth', authRouter);
 app.use('/sites', siteRouter);
 
-module.exports = app;
+export default app;

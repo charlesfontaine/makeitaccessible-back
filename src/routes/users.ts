@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router();
+import express, { Request, Response } from "express";
+const router = express.Router();
 
 const User = require("../models/users");
 const Audit = require("../models/audits");
@@ -192,6 +192,4 @@ router.delete("/",  async(req, res)  => {
   });
 });
 
-
-
-module.exports = router;
+export { router };

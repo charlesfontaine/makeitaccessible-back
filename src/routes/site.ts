@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router();
+import express, { Request, Response } from "express";
+const router = express.Router();
 
 const { getSiteAuditSummaryController, deleteSiteController, getSiteView } = require('../controllers/site.controller.js');
 
@@ -12,4 +12,4 @@ router.get('/archive/:token/:id', getSiteView);
 // DELETE / supprimer un site
 router.delete('/:siteId', deleteSiteController);
 
-module.exports = router;
+export { router }
