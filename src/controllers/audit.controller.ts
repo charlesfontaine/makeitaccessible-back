@@ -5,7 +5,7 @@
 const playwright = require('playwright');
 
 const runAllTests = require("../tests/runAllTests.js");
-const User = require('../models/users');
+const User = require('../models/users.js');
 const Site = require("../models/sites.js");
 const Audit = require("../models/audits.js");
 const Test = require("../models/tests.js");
