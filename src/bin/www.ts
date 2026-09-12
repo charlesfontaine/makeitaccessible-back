@@ -4,15 +4,16 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+import app from '../app';
+import http from 'http';
+import config from '../config/config';
 var debug = require('debug')('makeitaccessible-back:server');
-var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(config.port);
 app.set('port', port);
 
 /**
@@ -30,17 +31,10 @@ server.on('error', onError);
 server.on('listening', onListening);
 
 /**
- * Normalize a port into a number, string, or false.
+ * Normalize a port into a number or false.
  */
 
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
+function normalizePort(port: number): number | boolean {
   if (port >= 0) {
     // port number
     return port;
@@ -53,7 +47,7 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+function onError(error: NodeJS.ErrnoException) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -83,6 +77,7 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
+  if (addr === null) return;
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
