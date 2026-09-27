@@ -1,20 +1,5 @@
-import mongoose, { Types } from 'mongoose';
-
-export interface IAudit {
-  url: string | undefined;
-  status: string;
-  createdAt: Date;
-  summary: {
-    inapplicable: number;
-    passes: number;
-    incomplete: number;
-    violations: number;
-    total: number;
-    score: number;
-  };
-  site: Types.ObjectId;
-  user: Types.ObjectId;
-}
+import mongoose from 'mongoose';
+import { IAudit } from './types/AuditInterface';
 
 const auditSchema = new mongoose.Schema<IAudit>({
   url: { type: String, default: null }, // url du site à auditer

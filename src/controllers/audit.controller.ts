@@ -1,23 +1,36 @@
-// Nécessaire pour la mise en production sur Vercel car les fonctions serverless de Vercel ne supportent pas Playwright nativement
-// On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
-// const playwright = require('playwright-core');
-// const chromium = require('@sparticuz/chromium');
-const playwright = require('playwright');
+/**
+ * Useful comments:
+ * Nécessaire pour la mise en production sur Vercel car les fonctions serverless de Vercel ne supportent pas Playwright nativement
+ * On utilise @sparticuz/chromium + playwright-core pour faire tourner Playwright sur des environnements serverless.
+ * const playwright = require('playwright-core');
+ * const chromium = require('@sparticuz/chromium');
+ */
 
-const runAllTests = require("../tests/runAllTests.js");
-const User = require('../models/users.js');
-const Site = require("../models/sites.js");
-const Audit = require("../models/audits.js");
-const Test = require("../models/tests.js");
-const { checkBody } = require("../modules/checkBody.js");
-const { calculateAuditSummary } = require('../services/scoreAudit.service.js');
-const { getSiteAuditSummary } = require("../services/scoreSite.service.js");
+import { Request, Response } from 'express';
+import playwright from 'playwright';
+import moment from "moment";
 
-const moment = require('moment');
+import { type AuditType } from '../routes/types/audits/AuditType';
+import { IAxeResultsByCat } from '../tests/types/IAxeResultsByCatInterface';
 
-// CREATE
-// Fonction de création d'un audit
-const createAudit = async (siteId, userId, url) => {
+import User from "../models/users";
+import Site from "../models/sites";
+import Audit from "../models/audits";
+import Test from "../models/tests";
+
+import { checkBody } from "../modules/checkBody";
+import { runAllTests } from "../tests/runAllTests";
+import { calculateAuditSummary } from "../services/scoreAudit.service";
+import { getSiteAuditSummary } from "../services/scoreSite.service";
+
+/**
+ * Utility function to create an audit
+ * @param siteId 
+ * @param userId 
+ * @param url 
+ * @returns 
+ */
+const createAudit = async (siteId: number, userId: number, url: string) => {
   const audit = new Audit({
     url,
     status: "running",
@@ -34,7 +47,13 @@ const createAudit = async (siteId, userId, url) => {
   return newAudit;
 };
 
-// Fonction de création des tests
+/**
+ * Utility function to create tests of an audit
+ * @param category 
+ * @param resultsByFilteredCategory 
+ * @param auditId 
+ * @returns 
+ */
 const createTests = async (category, resultsByFilteredCategory, auditId) => {
   // console.log('resultsByFilteredCategory', resultsByFilteredCategory);
 
@@ -63,8 +82,15 @@ const createTests = async (category, resultsByFilteredCategory, auditId) => {
   return newTest;
 };
 
-// Fonction de création d'un audit + tests associés
-const handleCreateAudit = async (siteId, userId, url, axeCoreResults) => {
+/**
+ * Utility function to join an audit and its relied tests
+ * @param siteId 
+ * @param userId 
+ * @param url 
+ * @param axeCoreResults 
+ * @returns 
+ */
+const handleCreateAudit = async (siteId: number, userId: number, url: string, axeCoreResults: IAxeResultsByCat[]) => {
   // On initialise un nouvel audit et on attend qu'il s'enregistre en bdd
   let newAudit;
 
@@ -78,7 +104,7 @@ const handleCreateAudit = async (siteId, userId, url, axeCoreResults) => {
   if (newAudit) {
     // On enregistre chaque test dans un tableau de promesses
     // => Pour l'instant on remonte tous les résultats (pas que les violations/anomalies)
-    const promises = axeCoreResults.map(async (result) => {
+    const promises = axeCoreResults.map(async (result: IAxeResultsByCat) => {
       return await createTests(
         result.category,
         result.resultsByFilteredCategory,
@@ -93,9 +119,6 @@ const handleCreateAudit = async (siteId, userId, url, axeCoreResults) => {
       // => On retourne le résultat Promise.all et Promise.all renvoie lui même une promesse où dedans on cacule les totaux et le score
       return Promise.all(promises).then(newTests => {
         console.log('Tests created');
-        // console.log("newTests", newTests);
-        // console.log(`All ${newTests} have been saved!`);
-
         // On appelle le service qui gère le calcul du score global
         const summary = calculateAuditSummary(newTests);
 
@@ -128,8 +151,13 @@ const handleCreateAudit = async (siteId, userId, url, axeCoreResults) => {
   }
 }
 
-// Fonction de création d'un audit appelé par la route POST /audit
-const createAuditAction = async (req, res) => {
+/**
+ * POST /audit to create an audit
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const createAuditAction = async (req: Request<{}, any, AuditType>, res: Response) => {
   const { url, name, domain, token } = req.body;
   
   // Regex pour vérifier si conforme : doit commencer par https:// + obligation d'avoir un point avec des caractères de chaque côté.
@@ -145,83 +173,89 @@ const createAuditAction = async (req, res) => {
 
   // Lance le scan via runAllTests et on "attend" le retour des résultats de axe-core (filtrés par catégorie) avant d'enregistrer un site
   try {
-    axeCoreResults = await runAllTests(url);
-  } catch (error) {
-    console.error(error);
-    res.status(503).json({ result: false, error: "L'audit a échoué, veuillez réessayer." });
-    return;
-  }
+    const axeCoreResults = await runAllTests(url);
+    console.log("axeCoreResults", axeCoreResults);
 
-  // Si on a des résultats (anomalies, etc...)
-  if (axeCoreResults) {
-    // Pour afficher les données bruts ou filtrées par catégorie
-    // res.status(200).json({ result: true, axeCoreResults });
-    // return;
-    const user = token ? await User.findOne({ token }) : null;
+    // Si on a des résultats (anomalies, etc...)
+    if (axeCoreResults) {
+      // Pour afficher les données bruts ou filtrées par catégorie
+      // res.status(200).json({ result: true, axeCoreResults });
+      // return;
+      const user = token ? await User.findOne({ token }) : null;
 
-    // Vérifie si un site existe déjà
-    const newSite = await Site.findOne({ domain }).then((site) => {
-      // Si un site n'existe pas, on enregistre un nouveau site dans la collection "sites"
-      if (site === null) {
-        const website = new Site({
-          name,
-          domain,
-          createdAt: Date.now(),
-          user
-        });
+      // Vérifie si un site existe déjà
+      const newSite = await Site.findOne({ domain }).then((site) => {
+        // Si un site n'existe pas, on enregistre un nouveau site dans la collection "sites"
+        if (site === null) {
+          const website = new Site({
+            name,
+            domain,
+            createdAt: Date.now(),
+            user
+          });
 
-        // On attend que le site s'enregistre, puis on créé un nouvel audit et les tests
-        return website.save().then(newSite => {
-          console.log('Website created');
-          return newSite;
-        });
-      } else {
-        // Sinon un site existe, on update la date du site existant
-        return Site.updateOne({ domain }, { updatedAt: Date.now() }).then(updatedSite => {
-            if (updatedSite.modifiedCount > 0) {
-              console.log('Website updated');
-              return site;
+          // On attend que le site s'enregistre, puis on créé un nouvel audit et les tests
+          return website.save().then(newSite => {
+            console.log('Website created');
+            return newSite;
+          });
+        } else {
+          // Sinon un site existe, on update la date du site existant
+          return Site.updateOne({ domain }, { updatedAt: Date.now() }).then(updatedSite => {
+              if (updatedSite.modifiedCount > 0) {
+                console.log('Website updated');
+                return site;
+              }
             }
+          );
+        }
+      });
+
+      if (newSite) {
+        // On crée un nouvel audit
+        const newAudit = await handleCreateAudit(newSite._id, user?._id, url, axeCoreResults);
+        // console.log('newAudit', newAudit);
+        console.log('Audit created');
+
+        // Si un Audit a bien été créé en bdd
+        if (newAudit) {
+          // Vérifie si l'utilisateur est connecté via son token
+          if (!user) {
+            // Non connecté : score global uniquement : results
+            return res.status(200).json({
+              result: true,
+              website: newSite,
+              results: newAudit.results,
+            });
+          } else {
+            // Connecté : toutes les données disponibles à l'utilisateur : results + tests
+            return res.status(200).json({
+              result: true,
+              website: newSite,
+              results: newAudit.results,
+              tests: newAudit.tests,
+            });
           }
-        );
-      }
-    });
-
-    // On crée un nouvel audit
-    const newAudit = await handleCreateAudit(newSite._id, user?._id, url, axeCoreResults);
-    // console.log('newAudit', newAudit);
-    console.log('Audit created');
-
-    // Si un Audit a bien été créé en bdd
-    if (newAudit) {
-      // Vérifie si l'utilisateur est connecté via son token
-      if (!user) {
-        // Non connecté : score global uniquement : results
-        return res.status(200).json({
-          result: true,
-          website: newSite,
-          results: newAudit.results,
-        });
-      } else {
-        // Connecté : toutes les données disponibles à l'utilisateur : results + tests
-        return res.status(200).json({
-          result: true,
-          website: newSite,
-          results: newAudit.results,
-          tests: newAudit.tests,
-        });
+        } else {
+          res.status(403).json({ result: false, error: "Aucun résultat" });
+        }
       }
     } else {
       res.status(403).json({ result: false, error: "Aucun résultat" });
     }
-  } else {
-    res.status(403).json({ result: false, error: "Aucun résultat" });
+  } catch (error) {
+    console.error(error);
+    res.status(503).json({ result: false, error: "Audit failed, try again." });
+    return;
   }
 }
 
-// READ
-// Fonction qui récupère un audit via son id (indentication d'une ressource via le params envoyé dans l'url)
-const getAuditAction = (req, res) => {
+/**
+ * GET /audit to get an audit via his id (resources identified by params send via the url)
+ * @param req 
+ * @param res 
+ */
+const getAuditAction = (req: Request<{ id: number }, any, {}>, res: Response) => {
   Audit.findById(req.params.id).then((auditDoc) => {
     if (auditDoc !== null) {
       Test.find({ audit: auditDoc._id }).then(testsDoc => {
@@ -237,8 +271,12 @@ const getAuditAction = (req, res) => {
   });
 }
 
-
-// Tous les audits d'un utilisateur connecté, avec leur site (POST /audit/all)
+/** GET /
+ * Tous les audits d'un utilisateur connecté, avec leur site (POST /audit/all)
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 const getAllAuditsAction = async (req, res) => {
   const { token } = req.body;
 
@@ -258,7 +296,12 @@ const getAllAuditsAction = async (req, res) => {
   res.status(200).json({ result: true, audits });
 };
 
-// GET / dynamique par audit 
+/**
+ * GET /audit/{query}: dynamic route to get an audit 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 const getAuditViewAction = async (req, res) => {
   const { token, id } = req.params;
 
@@ -281,8 +324,13 @@ const getAuditViewAction = async (req, res) => {
 
 };
 
-// rechercher un audit
-const searchAuditAction = async (req, res) => {
+/**
+ * GET /audit: search and audit
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const searchAuditAction = async (req: Request<{token: string}, any, {}, {search: string}>, res: Response) => {
 	const { search } = req.query;
 	const { token } = req.params;
 
@@ -292,7 +340,7 @@ const searchAuditAction = async (req, res) => {
 			return res.status(403).json({ result: false, error: "Utilisateur non trouvé" });
 		}
 
-		const filters = {};
+		const filters: {url?: string} = {};
 		if (search) filters.url = { $regex: new RegExp(search, 'i') };
 
 		const audits = await Audit.find(filters).populate('site');
@@ -301,14 +349,19 @@ const searchAuditAction = async (req, res) => {
 			return res.json({ result: false, error: 'Aucun audit trouvé' });
 		}
 		res.json({ result: true, search: audits });
-	} catch (error) {
-		res.status(500).json({ result: false, error: error.message });
+  } catch (error) {
+    if(error instanceof Error)
+		  res.status(500).json({ result: false, error: error.message });
 	}
 };
 
-// DELETE
-// supprimer un audit
-const deleteAuditAction = async (req, res) => {
+/**
+ * DELETE /audit: delete an audit
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const deleteAuditAction = async (req: Request<{id: number}, any, {token: string}>, res: Response) => {
   const { id } = req.params;
   const { token } = req.body;
 
@@ -357,8 +410,13 @@ const deleteAuditAction = async (req, res) => {
 };
 
 // GET: générer les résultats d'un audit au format PDF
-
-const generatePDFAuditAction = async (req, res, next) => {
+/**
+ * GET /audit: generate the audits' results and export it in PDF format
+ * @param req 
+ * @param res 
+ * @param next 
+ */
+const generatePDFAuditAction = async (req: Request, res: Response, next) => {
   User.findOne({ token: req.params.token }).then(userDoc => {
     if (userDoc === null) {
       res.json({ result: false, error: 'User not found' });
@@ -436,5 +494,12 @@ const generatePDFAuditAction = async (req, res, next) => {
   });
 }
 
-
-module.exports = { createAuditAction, getAuditAction, getAllAuditsAction, getAuditViewAction, searchAuditAction, deleteAuditAction, generatePDFAuditAction };
+export {
+  createAuditAction,
+  getAuditAction,
+  getAllAuditsAction,
+  getAuditViewAction,
+  searchAuditAction,
+  deleteAuditAction,
+  generatePDFAuditAction
+};

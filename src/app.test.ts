@@ -1,5 +1,4 @@
 import request from 'supertest';
-import mongoose from 'mongoose';
 import app from './app';
 
 // Can post an audit as an anonymous user (launch createAuditAction function)

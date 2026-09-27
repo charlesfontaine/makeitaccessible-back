@@ -1,12 +1,5 @@
-import mongoose, { Types } from 'mongoose';
-
-export interface ISite {
-  name: string;
-  domain: string;
-  createdAt: Date;
-  updatedAt: Date;
-  user: Types.ObjectId;
-}
+import mongoose from 'mongoose';
+import { ISite } from "./types/SiteInterface"
 
 const siteSchema = new mongoose.Schema<ISite>({
   name: String,

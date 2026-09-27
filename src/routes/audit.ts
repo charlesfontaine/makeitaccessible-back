@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
+import express from "express";
 const router = express.Router();
 
-const {
+import {
   createAuditAction,
   getAuditAction,
   getAllAuditsAction,
   getAuditViewAction,
   deleteAuditAction,
   searchAuditAction,
-  generatePDFAuditAction } = require('../controllers/audit.controller.js');
+  generatePDFAuditAction } from '../controllers/audit.controller';
 
 // Route POST qui lance un audit et récupère la proprieté "url" dans le corps (body) de la requête
 router.post("/", createAuditAction);

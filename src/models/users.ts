@@ -1,29 +1,18 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
+import { IUser } from "./types/UserInterface"
 
-export interface IUsers {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
-  token: string;
-  googleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const userSchema = new mongoose.Schema<IUsers>({
+const userSchema = new mongoose.Schema<IUser>({
+  token: String,
   firstName: String,
   lastName: String,
   username: String,
   email: String,
   password: String,
-  token: String,
   googleId: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const User = mongoose.model<IUsers>("users", userSchema);
+const User = mongoose.model<IUser>("users", userSchema);
 
 export default User;
