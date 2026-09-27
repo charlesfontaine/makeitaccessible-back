@@ -56,6 +56,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
 
 # next.js build output
 .next
@@ -72,11 +73,14 @@ typings/
 
 # Others
 README.md
-controllers/users.controller.js
-tests/example.spec.js
+controllers/users.controller.ts
+tests/example.spec.ts
 
 #PDFs
 /pdfs/
 
 #Typescript
 /dist/
+
+#docs
+/docs/
