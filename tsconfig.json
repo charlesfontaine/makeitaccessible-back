@@ -9,7 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "target": "es2015",
+    "target": "esnext",
     "noUncheckedIndexedAccess": true,     // Empêche d'accéder à une propriété sans avoir vérifié au préalable l'index (sauf cas d'utilisation d'un tuple)
     "moduleResolution": "bundler",        // Autorise les imports relatifs sans extension et ndique au système de résolution d'aller récupérer dans node_modules les fichiers de déclaration s'ils sont absents
     "noEmitOnError": false,               // Ne génère pas de fichier de sortie si TS rencontre une erreur
