@@ -1,5 +1,7 @@
+import { AxeResults } from "axe-core";
+
 // Filtre les resultats (inapplicable, passes, incomplete et violiations "aka" anomalies) liées RGAA par thématique : thématique Images <=> RGAA-1.
-const scanTableaux = (audit) => {
+const scanTableaux = (audit: AxeResults) => {
   let inapplicable = audit.inapplicable.filter((item) =>
     item.tags.some((tag) => tag.includes("RGAA-5.")),
   );

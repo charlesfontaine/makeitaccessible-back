@@ -23,4 +23,4 @@ const scanCadres = (audit: AxeResults) => {
   };
 };
 
-export { scanCadres }
+export { scanCadres };
