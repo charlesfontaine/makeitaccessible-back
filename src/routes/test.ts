@@ -1,6 +1,6 @@
-import express, { Request, Response } from "express";
+import express from "express";
 const router = express.Router();
-const {testValidationAction, testIgnoreAction, testReviewAction} = require('../controllers/test.controller.js');
+import {testValidationAction, testIgnoreAction, testReviewAction} from "../controllers/test.controller.js";
 
 // Route PUT qui valide une rule axe-core
 router.put("/validate", testValidationAction);
