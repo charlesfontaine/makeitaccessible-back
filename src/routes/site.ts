@@ -1,7 +1,7 @@
-import express, { Request, Response } from "express";
+import express from "express";
 const router = express.Router();
 
-const { getSiteAuditSummaryController, deleteSiteController, getSiteView } = require('../controllers/site.controller.js');
+import { getSiteAuditSummaryController, deleteSiteController, getSiteView } from '../controllers/site.controller.js';
 
 // POST / enregistre un résumé pour un site (tous les audits (url) d'un même site (domain))
 router.post("/:siteId/audit-summary", getSiteAuditSummaryController); 

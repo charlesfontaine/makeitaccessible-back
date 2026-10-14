@@ -52,17 +52,20 @@ const importRGAA = async () => {
         for (const criteriaData of topicData.criteria) {
           const wcagRefArray = criteriaData.criterium.references[0].wcag;
 
-          const testsArray = Object.entries(criteriaData.criterium.tests).map(test => {
-            const newTest = {};
-            newTest.testNumber = Number(test[0]);
-            newTest.conditions = test[1];
-            return newTest;
-          });
+          const testsArray = Object.entries(criteriaData.criterium.tests).map(
+            (test) => {
+              const newTest = {
+                testNumber: Number(test[0]),
+                conditions: String(test[1])
+              };
+              return newTest;
+            },
+          );
 
           const criteria = new Criteria({
             criteriaNumber: criteriaData.criterium.number,
             title: criteriaData.criterium.title,
-            criticality: 'A',
+            criticality: "A",
             reference: wcagRefArray,
             topic: topic._id,
             tests: testsArray,

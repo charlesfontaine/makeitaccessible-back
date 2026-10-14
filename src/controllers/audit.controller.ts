@@ -9,7 +9,9 @@
 import { Request, Response } from 'express';
 import playwright from 'playwright';
 import moment from "moment";
+import fs from 'fs';
 
+import { QueryFilter, Types } from 'mongoose';
 import { type AuditType } from '../routes/types/audits/AuditType';
 import { IAxeResultsByCat } from '../tests/types/IAxeResultsByCatInterface';
 
@@ -22,6 +24,9 @@ import { checkBody } from "../modules/checkBody";
 import { runAllTests } from "../tests/runAllTests";
 import { calculateAuditSummary } from "../services/scoreAudit.service";
 import { getSiteAuditSummary } from "../services/scoreSite.service";
+import { IAudit } from '../models/types/AuditInterface';
+
+declare const axe: typeof import('axe-core');
 
 /**
  * Utility function to create an audit
@@ -30,7 +35,7 @@ import { getSiteAuditSummary } from "../services/scoreSite.service";
  * @param url 
  * @returns 
  */
-const createAudit = async (siteId: number, userId: number, url: string) => {
+const createAudit = async (siteId: string | Types.ObjectId, userId: string | Types.ObjectId | undefined, url: string) => {
   const audit = new Audit({
     url,
     status: "running",
@@ -54,14 +59,14 @@ const createAudit = async (siteId: number, userId: number, url: string) => {
  * @param auditId 
  * @returns 
  */
-const createTests = async (category, resultsByFilteredCategory, auditId) => {
+const createTests = async (category: string, resultsByFilteredCategory: IAxeResultsByCat['resultsByFilteredCategory'], auditId: string | Types.ObjectId) => {
   // console.log('resultsByFilteredCategory', resultsByFilteredCategory);
 
   // Pour chaque document testDoc créé, extrait chaque règle Axe-core par type et ajoute en complément la key status "to_do" 
   // et la key comments (à chaîne vide) à chaque objet de règle en mappant chaque rules catégorisées
   // Attention! {...rule} spread tiut le contenu de l'objet rule
   const inapplicable = resultsByFilteredCategory.inapplicable.map(rule => ({ ...rule, status: 'to_do', comment: '' }));
-  const passes = resultsByFilteredCategory.passes.map(rule => ({ ...rule, status: 'validated', comment: null }));
+  const passes = resultsByFilteredCategory.passes.map(rule => ({ ...rule, status: 'validated', comment: '' }));
   const incomplete = resultsByFilteredCategory.incomplete.map(rule => ({ ...rule, status: 'to_do', comment: '' }));
   const violations = resultsByFilteredCategory.violations.map(rule => ({ ...rule, status: 'to_do', comment: '' }));
 
@@ -90,7 +95,7 @@ const createTests = async (category, resultsByFilteredCategory, auditId) => {
  * @param axeCoreResults 
  * @returns 
  */
-const handleCreateAudit = async (siteId: number, userId: number, url: string, axeCoreResults: IAxeResultsByCat[]) => {
+const handleCreateAudit = async (siteId: string | Types.ObjectId, userId: string | Types.ObjectId | undefined, url: string, axeCoreResults: IAxeResultsByCat[]) => {
   // On initialise un nouvel audit et on attend qu'il s'enregistre en bdd
   let newAudit;
 
@@ -100,7 +105,7 @@ const handleCreateAudit = async (siteId: number, userId: number, url: string, ax
     console.error(error);
   }
 
-  // Si un nouvel a été enregistré en bdd
+  // Si un nouvel audit a été enregistré en bdd
   if (newAudit) {
     // On enregistre chaque test dans un tableau de promesses
     // => Pour l'instant on remonte tous les résultats (pas que les violations/anomalies)
@@ -116,7 +121,7 @@ const handleCreateAudit = async (siteId: number, userId: number, url: string, ax
     if (promises.length > 0) {
       // On attend que toutes les promesses soient résolues => Promise.all
       // => On attends que toutes les tests soient enregistrées en bdd
-      // => On retourne le résultat Promise.all et Promise.all renvoie lui même une promesse où dedans on cacule les totaux et le score
+      // => On retourne le résultat Promise.all et Promise.all renvoie lui même une promesse où dedans on calcule les totaux et le score
       return Promise.all(promises).then(newTests => {
         console.log('Tests created');
         // On appelle le service qui gère le calcul du score global
@@ -158,7 +163,7 @@ const handleCreateAudit = async (siteId: number, userId: number, url: string, ax
  * @returns 
  */
 const createAuditAction = async (req: Request<{}, any, AuditType>, res: Response) => {
-  const { url, name, domain, token } = req.body;
+  const { token, url, name, domain } = req.body;
   
   // Regex pour vérifier si conforme : doit commencer par https:// + obligation d'avoir un point avec des caractères de chaque côté.
   const checkUrl = /^https:\/\/.+\..+/;
@@ -255,7 +260,7 @@ const createAuditAction = async (req: Request<{}, any, AuditType>, res: Response
  * @param req 
  * @param res 
  */
-const getAuditAction = (req: Request<{ id: number }, any, {}>, res: Response) => {
+const getAuditAction = (req: Request<{ id: string }, any, {}>, res: Response) => {
   Audit.findById(req.params.id).then((auditDoc) => {
     if (auditDoc !== null) {
       Test.find({ audit: auditDoc._id }).then(testsDoc => {
@@ -277,16 +282,16 @@ const getAuditAction = (req: Request<{ id: number }, any, {}>, res: Response) =>
  * @param res 
  * @returns 
  */
-const getAllAuditsAction = async (req, res) => {
+const getAllAuditsAction = async (req: Request<{}, any, {token: string}>, res: Response) => {
   const { token } = req.body;
 
   if (!token) {
-    return res.status(403).json({ result: false, error: "Token manquant" });
+    return res.status(403).json({ result: false, error: "Token is missing" });
   }
 
   const user = await User.findOne({ token });
   if (!user) {
-    return res.status(403).json({ result: false, error: "Utilisateur non trouvé" });
+    return res.status(403).json({ result: false, error: "User not found" });
   }
 
   const audits = await Audit.find({ user: user._id, status: "completed" })
@@ -302,7 +307,7 @@ const getAllAuditsAction = async (req, res) => {
  * @param res 
  * @returns 
  */
-const getAuditViewAction = async (req, res) => {
+const getAuditViewAction = async (req: Request<{ token: string;  id: string}, any, {}>, res: Response) => {
   const { token, id } = req.params;
 
    const user = await User.findOne({ token });
@@ -330,7 +335,7 @@ const getAuditViewAction = async (req, res) => {
  * @param res 
  * @returns 
  */
-const searchAuditAction = async (req: Request<{token: string}, any, {}, {search: string}>, res: Response) => {
+const searchAuditAction = async (req: Request<{ token: string }, any, {}, { search: string }>, res: Response) => {
 	const { search } = req.query;
 	const { token } = req.params;
 
@@ -340,8 +345,8 @@ const searchAuditAction = async (req: Request<{token: string}, any, {}, {search:
 			return res.status(403).json({ result: false, error: "Utilisateur non trouvé" });
 		}
 
-		const filters: {url?: string} = {};
-		if (search) filters.url = { $regex: new RegExp(search, 'i') };
+		const filters: QueryFilter<IAudit> = {};
+    if (search) filters.url = { $regex: new RegExp(search, 'i') };
 
 		const audits = await Audit.find(filters).populate('site');
 
@@ -361,23 +366,23 @@ const searchAuditAction = async (req: Request<{token: string}, any, {}, {search:
  * @param res 
  * @returns 
  */
-const deleteAuditAction = async (req: Request<{id: number}, any, {token: string}>, res: Response) => {
+const deleteAuditAction = async (req: Request<{ id: string }, any, { token: string }>, res: Response) => {
   const { id } = req.params;
   const { token } = req.body;
 
   // CheckBody vérifie que token est présent et non vide
   if (!checkBody(req.body, ['token'])) {
-    return res.status(403).json({ result: false, error: "Token manquant" });
+    return res.status(403).json({ result: false, error: "Token is missing" });
   }
 
   // Vérifier si un utilisateur existe et si un site existe aussi 
   const user = await User.findOne({ token });
   if (!user) {
-    return res.status(403).json({ result: false, error: "Utilisateur non trouvé" });
+    return res.status(403).json({ result: false, error: "User not found" });
   }
   const audit = await Audit.findById(id);
   if (!audit) {
-    return res.status(403).json({ result: false, error: "Audit introuvable" });
+    return res.status(403).json({ result: false, error: "Audit not found" });
   }
 
   // 1. vérifie que l'utilisateur est bien propriétaire de l'audit
@@ -416,7 +421,7 @@ const deleteAuditAction = async (req: Request<{id: number}, any, {token: string}
  * @param res 
  * @param next 
  */
-const generatePDFAuditAction = async (req: Request, res: Response, next) => {
+const generatePDFAuditAction = async (req: Request, res: Response) => {
   User.findOne({ token: req.params.token }).then(userDoc => {
     if (userDoc === null) {
       res.json({ result: false, error: 'User not found' });
@@ -425,8 +430,8 @@ const generatePDFAuditAction = async (req: Request, res: Response, next) => {
 
     Audit.findById(req.params.id).then(async auditDoc => {
       if (auditDoc !== null) {
-        const script = readFileSync(`./build/static/js/main.<hash>.js`) // reference to compiled react app
-        const css = readFileSync(`./build/static/css/main.<hash>.css`) // reference to compiled react css
+        const script = fs.readFileSync(`./build/static/js/main.<hash>.js`) // reference to compiled react app
+        const css = fs.readFileSync(`./build/static/css/main.<hash>.css`) // reference to compiled react css
 
         const staticHtml = `
           <!DOCTYPE html>
@@ -451,7 +456,7 @@ const generatePDFAuditAction = async (req: Request, res: Response, next) => {
           browser = await playwright.chromium.launch({
             args: chromium.args,
             executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+            headless: true,
           });
         } else {
           // Local : playwright complet avec navigateurs installés

@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import passport from "passport";
 
 const router = express.Router();
@@ -12,9 +12,7 @@ router.get(
 );
 
 // Callback Google
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false }),
+router.get('/google/callback', passport.authenticate('google', { session: false }),
   (req, res) => {
     if (!req.user) {
       return res.status(401).json({ result: false, error: 'Auth failed' });
