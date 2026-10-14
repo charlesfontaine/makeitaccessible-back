@@ -10,7 +10,7 @@ export interface IAudit {
     incomplete: number;
     violations: number;
     total: number;
-    score: number;
+    score: number | null;
   };
   site: Types.ObjectId;
   user: Types.ObjectId;

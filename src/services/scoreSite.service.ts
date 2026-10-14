@@ -1,7 +1,10 @@
 /* Ce service calcule le score global d'un site en fusionnant tous ses audits */
+import { Types, type HydratedDocument } from "mongoose";
 import Audit from "../models/audits.js";
 import Test from "../models/tests.js";
 import { calculateScore } from "./scoreAudit.service.js";
+import { ITest, type RulesType } from "../models/types/TestInterface";
+import { IAudit } from "../models/types/AuditInterface";
 
 /* 
   NOTE_AUDIT définit l'ordre de gravité des statuts, du pire au meilleur :
@@ -14,9 +17,9 @@ import { calculateScore } from "./scoreAudit.service.js";
   un index plus petit = un statut plus grave
 */
 
-const NOTE_AUDIT = ['violations', 'incomplete', 'passes', 'inapplicable'];
+const NOTE_AUDIT: RulesType[] = ['violations', 'incomplete', 'passes', 'inapplicable'];
 
-const getSiteAuditSummary = async (siteId, userId) => {
+const getSiteAuditSummary = async (siteId: string | Types.ObjectId, userId: Types.ObjectId) => {
 
     // ÉTAPE 1 : Récupère tous les audits du site Audit.find({ site: siteId })
     const audits = await Audit.find({ site: siteId, status: "completed", user: userId });
@@ -25,7 +28,7 @@ const getSiteAuditSummary = async (siteId, userId) => {
     // Précision : audits est un tableau retourné par Audit.find()
     // même s'il ne contient qu'un seul élément, c'est toujours un tableau d'où le [0]
 
-    if (audits.length === 1) {
+    if (audits.length === 1 && audits[0]) {
         return {
             summary: audits[0].summary,
             pages: [{
@@ -46,15 +49,13 @@ const getSiteAuditSummary = async (siteId, userId) => {
 
     // On va fusionner toutes les règles de tous les tests de toutes les pages
     // On utilise un objet vide pour stocker la règle et son pire statut trouvé
-    const mergedRules = {};
+    const mergedRules: { [key: string]: { notes: RulesType } } = {};
 
     // On parcourt chaque test (= chaque thématique RGAA de chaque page)
-    tests.forEach(test => {
-
+  tests.forEach((test: HydratedDocument<ITest>) => {
         // Pour chaque statut possible : violations, incomplete, passes, inapplicable
         // NOTE_AUDIT est trié du pire au meilleur : violations = index 0 (pire)
         NOTE_AUDIT.forEach(notes => {
-
             // Pour chaque règle dans ce statut (ex: chaque règle en violation)
             test[notes].forEach(rule => {
 
@@ -76,7 +77,7 @@ const getSiteAuditSummary = async (siteId, userId) => {
     });
 
     // On compte combien de règles sont dans chaque statut final
-    const summary = { violations: 0, incomplete: 0, passes: 0, inapplicable: 0 };
+    const summary: IAudit['summary'] = { violations: 0, incomplete: 0, passes: 0, inapplicable: 0, total: 0, score: null };
 
     // Object.values() retourne un tableau de toutes les valeurs de l'objet
     Object.values(mergedRules).forEach(({ notes }) => summary[notes]++);
